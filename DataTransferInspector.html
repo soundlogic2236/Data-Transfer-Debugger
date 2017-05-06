@@ -1,0 +1,77 @@
+<html>
+	<head>
+		<script>
+		var file_urls = [];
+		function setContent(data) {
+			file_urls.forEach(URL.revokeObjectURL);
+			file_urls = []
+			var effects = document.getElementById("effects");
+			effects.innerHTML = "";
+			effects.appendChild(document.createTextNode("Effects: "+data.effectAllowed));
+			var target = document.getElementById("target");
+			var files = {}
+			Array.from(data.files).forEach(function(file) {
+				if(files.hasOwnProperty(file.type)) {
+					debugger;
+					throw "duplicate file type: "+file.type;
+				}
+				files[file.type] = file;
+			});
+			target.innerHTML = "";
+			Array.from(data.items).forEach(function(item) {
+				var result = target.appendChild(document.createElement('div'));
+				var type = item.type;
+				var kind = item.kind;
+				result.appendChild(document.createElement('h2')).appendChild(document.createTextNode(type));
+				result.appendChild(document.createElement('h3')).appendChild(document.createTextNode(kind));
+				switch(kind) {
+					case "string":
+						var value = data.getData(item.type);
+						result.appendChild(document.createElement('p'))
+						.appendChild(document.createTextNode(value));
+						break;
+					case "file":
+						var file = files[type];
+						var link = result.appendChild(document.createElement('a'))
+						link.appendChild(document.createTextNode(file.name));
+						var url = URL.createObjectURL(file.slice(0,file.size,type));
+						link.href = url;
+						link.type = type;
+						link.download = file.name;
+						file_urls.push(url);
+						if(type.startsWith("image/")) {
+							var image = link
+								.appendChild(document.createElement("div"))
+								.appendChild(document.createElement("img"));
+							image.src = url;
+						}
+						break;
+					default:
+						debugger;
+						throw "Unrecognised kind: "+kind;
+				}
+			})
+		};
+		document.addEventListener('paste', function(event){
+			document.getElementById("mode").textContent="Paste Data";
+			event.preventDefault();
+			setContent(event.clipboardData);
+		});
+		document.addEventListener('dragover', function(event) {
+			event.preventDefault();
+		});
+		document.addEventListener('drop', function(event) {
+			document.getElementById("mode").textContent="Drag and Drop Data";
+			event.preventDefault();
+			setContent(event.dataTransfer);
+		});
+		
+		</script>
+	</head>
+	<body>
+	<div id="root">
+	<h1 id="mode">Empty</h1>
+	<p id="effects"/>
+	<div id="target"/></div>
+	</body>
+</html>
