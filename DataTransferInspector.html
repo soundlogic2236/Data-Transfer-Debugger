@@ -28,7 +28,7 @@
 				var type = typeParts[0];
 				var subtype = typeParts[1];
 				var kind = item.kind;
-				
+
 				var node = document.createElement('div');
 				node.className = "item-display " + kind + "-kind " + type + "-type " + subtype + "-subtype"
 				var result = target.appendChild(node);
@@ -84,6 +84,11 @@
 
 		</script>
 		<title>Data Transfer Inspector</title>
+		<style>
+			.plain-subtype .value-display, .plain-subtype .value-display * {
+				white-space: pre-wrap;
+			}
+		</style>
 	</head>
 	<body>
 	<div id="root">
