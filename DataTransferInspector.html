@@ -19,27 +19,43 @@
 			});
 			target.innerHTML = "";
 			Array.from(data.items).forEach(function(item) {
-				var result = target.appendChild(document.createElement('div'));
-				var type = item.type;
+				var fullType = item.type;
+				var typeParts = fullType.split('/');
+				if(typeParts.length != 2) {
+					debugger;
+					throw "Type should consist of a type and subtype, not " + item.type;
+				}
+				var type = typeParts[0];
+				var subtype = typeParts[1];
 				var kind = item.kind;
-				result.appendChild(document.createElement('h2')).appendChild(document.createTextNode(type));
-				result.appendChild(document.createElement('h3')).appendChild(document.createTextNode(kind));
+				
+				var node = document.createElement('div');
+				node.className = "item-display " + kind + "-kind " + type + "-type " + subtype + "-subtype"
+				var result = target.appendChild(node);
+				var typeNode = result.appendChild(document.createElement('div'));
+				typeNode.className = "type-display"
+				typeNode.appendChild(document.createElement('h2')).appendChild(document.createTextNode(fullType));
+				var kindNode = result.appendChild(document.createElement('div'));
+				kindNode.className = "kind-display"
+				kindNode.appendChild(document.createElement('h3')).appendChild(document.createTextNode(kind));
+				var contentNode = result.appendChild(document.createElement('div'));
+				contentNode.className = "value-display"
 				switch(kind) {
 					case "string":
-						var value = data.getData(item.type);
-						result.appendChild(document.createElement('p'))
+						var value = data.getData(fullType);
+						contentNode.appendChild(document.createElement('p'))
 						.appendChild(document.createTextNode(value));
 						break;
 					case "file":
-						var file = files[type];
-						var link = result.appendChild(document.createElement('a'))
+						var file = files[fullType];
+						var link = contentNode.appendChild(document.createElement('a'))
 						link.appendChild(document.createTextNode(file.name));
-						var url = URL.createObjectURL(file.slice(0,file.size,type));
+						var url = URL.createObjectURL(file.slice(0,file.size,fullType));
 						link.href = url;
-						link.type = type;
+						link.type = fullType;
 						link.download = file.name;
 						file_urls.push(url);
-						if(type.startsWith("image/")) {
+						if(type.toUpperCase() === "image".toUpperCase()) {
 							var image = link
 								.appendChild(document.createElement("div"))
 								.appendChild(document.createElement("img"));
